@@ -13,7 +13,7 @@ from itsdangerous import URLSafeSerializer
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "supersecret")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/database.db'
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 * 1024
 
 UPLOAD_FOLDER = "uploads"
