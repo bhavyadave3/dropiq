@@ -11,7 +11,7 @@
     <h1 class="logo"><span>D</span>ropiq</h1>
     <p class="tagline">Fast. Private. Effortless sharing.</p>
 
-    {% if user.is_authenticated %}
+{% if current_user.is_authenticated %}
         <p>
             Welcome {{ user.username }} |
             <a href="/dashboard">Dashboard</a> |
