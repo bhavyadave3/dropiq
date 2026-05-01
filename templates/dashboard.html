@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Dropiq</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container">
+
+    <h2>Your Dashboard</h2>
+    <p class="tagline">Manage your shared files & texts</p>
+
+    <a href="/">← Back to Home</a>
+
+    <hr>
+
+    <!-- FILES -->
+    <h3>Your Files</h3>
+
+    <div class="grid">
+        {% for file in files %}
+        <div class="card">
+            <p class="name">{{ file.filename }}</p>
+
+            <div class="actions">
+                <input value="/download/{{ file.token }}" readonly>
+                <button onclick="copyText('/download/{{ file.token }}')">Copy</button>
+            </div>
+
+            <p class="timer">Expires automatically</p>
+        </div>
+        {% else %}
+        <p>No files uploaded</p>
+        {% endfor %}
+    </div>
+
+    <hr>
+
+    <!-- TEXT -->
+    <h3>Your Texts</h3>
+
+    <div class="grid">
+        {% for text in texts %}
+        <div class="card">
+            <p class="name">Text Share</p>
+
+            <div class="actions">
+                <input value="/text/{{ text.token }}" readonly>
+                <button onclick="copyText('/text/{{ text.token }}')">Copy</button>
+            </div>
+
+            <p class="timer">Expires automatically</p>
+        </div>
+        {% else %}
+        <p>No text shared</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+function copyText(val){
+    navigator.clipboard.writeText(val)
+    .then(()=>alert("Copied!"))
+    .catch(()=>alert("Failed"));
+}
+</script>
+
+</body>
+</html>
