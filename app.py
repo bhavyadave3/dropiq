@@ -11,12 +11,11 @@ from itsdangerous import URLSafeSerializer
 # ================= INIT =================
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
+app.secret_key = os.environ.get("SECRET_KEY", "supersecret")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 * 1024
 
-# Upload folder
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -27,34 +26,6 @@ login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
 serializer = URLSafeSerializer(app.secret_key)
-
-# ================= SECURITY =================
-
-@app.after_request
-def headers(response):
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    return response
-
-requests_log = {}
-
-def rate_limit(limit=20, window=60):
-    def decorator(f):
-        @wraps(f)
-        def wrapped(*args, **kwargs):
-            ip = request.remote_addr
-            now = time.time()
-
-            requests_log.setdefault(ip, [])
-            requests_log[ip] = [t for t in requests_log[ip] if now - t < window]
-
-            if len(requests_log[ip]) >= limit:
-                return "Too many requests", 429
-
-            requests_log[ip].append(now)
-            return f(*args, **kwargs)
-        return wrapped
-    return decorator
 
 # ================= MODELS =================
 
@@ -95,15 +66,7 @@ def validate_csrf(token):
 
 # ================= ROUTES =================
 
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    files = File.query.filter_by(user_id=current_user.id).all()
-    texts = Text.query.filter_by(user_id=current_user.id).all()
-    return render_template("dashboard.html", files=files, texts=texts)
-
 @app.route("/", methods=["GET","POST"])
-@rate_limit()
 def home():
     if request.method == "POST":
 
@@ -133,9 +96,9 @@ def home():
         ))
         db.session.commit()
 
-        return f"<input value='/download/{token}' id='linkBox'><button onclick='copyLink()'>Copy</button>"
+        return f"<input value='/download/{token}' id='linkBox'>"
 
-    return render_template("index.html", csrf=generate_csrf(), user=current_user)
+    return render_template("index.html", csrf=generate_csrf())
 
 @app.route("/download/<token>")
 def download(token):
@@ -148,51 +111,7 @@ def download(token):
     if not file:
         return "Invalid"
 
-    expiry = 1800 if file.is_guest else 172800
-
-    if time.time() - file.created_at > expiry:
-        return "Expired"
-
-    if not file.is_guest:
-        if not current_user.is_authenticated or current_user.id != file.user_id:
-            abort(403)
-
     return send_from_directory(app.config['UPLOAD_FOLDER'], file.filename, as_attachment=True)
-
-@app.route("/share_text", methods=["POST"])
-def share_text():
-    if not validate_csrf(request.form.get("csrf")):
-        return "CSRF error"
-
-    text = request.form.get("text")
-
-    uid = str(uuid.uuid4())
-    token = serializer.dumps(uid)
-
-    db.session.add(Text(
-        id=uid,
-        content=text,
-        token=token,
-        user_id=current_user.id if current_user.is_authenticated else None,
-        is_guest=not current_user.is_authenticated,
-        created_at=time.time()
-    ))
-    db.session.commit()
-
-    return f"<input value='/text/{token}' id='linkBox'><button onclick='copyLink()'>Copy</button>"
-
-@app.route("/text/<token>")
-def view_text(token):
-    try:
-        tid = serializer.loads(token)
-    except:
-        return "Invalid"
-
-    text = Text.query.get(tid)
-    if not text:
-        return "Invalid"
-
-    return f"<pre>{text.content}</pre>"
 
 # ================= AUTH =================
 
