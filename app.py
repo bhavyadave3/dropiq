@@ -1,7 +1,6 @@
 import os
 import uuid
 import time
-from functools import wraps
 from flask import Flask, render_template, request, redirect, abort, send_from_directory, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -13,6 +12,7 @@ from itsdangerous import URLSafeSerializer
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "supersecret")
 
+# Render-safe DB
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/database.db'
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 * 1024
 
@@ -42,18 +42,6 @@ class File(db.Model):
     is_guest = db.Column(db.Boolean)
     created_at = db.Column(db.Float)
 
-class Text(db.Model):
-    id = db.Column(db.String(100), primary_key=True)
-    content = db.Column(db.Text)
-    token = db.Column(db.String(200))
-    user_id = db.Column(db.Integer)
-    is_guest = db.Column(db.Boolean)
-    created_at = db.Column(db.Float)
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
 # ================= HELPERS =================
 
 def generate_csrf():
@@ -63,6 +51,10 @@ def generate_csrf():
 
 def validate_csrf(token):
     return token == session.get("csrf")
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 # ================= ROUTES =================
 
@@ -74,9 +66,8 @@ def home():
             return "CSRF error"
 
         file = request.files.get("file")
-
         if not file:
-            return "No file"
+            return "No file selected"
 
         uid = str(uuid.uuid4())
         filename = uid + "_" + file.filename
@@ -96,7 +87,7 @@ def home():
         ))
         db.session.commit()
 
-        return f"<input value='/download/{token}' id='linkBox'>"
+        return f"<input value='/download/{token}'>"
 
     return render_template("index.html", csrf=generate_csrf())
 
@@ -109,7 +100,7 @@ def download(token):
 
     file = File.query.get(fid)
     if not file:
-        return "Invalid"
+        return "Invalid file"
 
     return send_from_directory(app.config['UPLOAD_FOLDER'], file.filename, as_attachment=True)
 
