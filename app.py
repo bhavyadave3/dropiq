@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500 MB
 
