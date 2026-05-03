@@ -1,74 +1,54 @@
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #0f0f0f, #2c2c2c);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background: #0f1115;
+    font-family: Arial;
+    color: white;
+    text-align: center;
 }
 
 .container {
-    background: #222;
-    padding: 40px;
-    border-radius: 15px;
-    width: 400px;
-    text-align: center;
-    color: white;
-}
-
-.logo {
-    font-size: 32px;
-    font-weight: bold;
+    margin-top: 80px;
 }
 
 .logo span {
-    color: #00c6ff;
+    color: #00d4ff;
 }
 
 .drop-area {
     border: 2px dashed #555;
-    padding: 25px;
-    border-radius: 10px;
-    margin-bottom: 15px;
+    padding: 40px;
+    margin: 20px;
     cursor: pointer;
 }
 
 .drop-area.active {
-    border-color: #00c6ff;
+    border-color: #00d4ff;
 }
 
 button {
-    background: #00c6ff;
+    background: #00d4ff;
+    padding: 12px 20px;
     border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
     cursor: pointer;
-    color: black;
 }
 
 .progress-container {
-    width: 100%;
-    background: #111;
-    margin-top: 15px;
-    border-radius: 5px;
+    width: 80%;
+    margin: auto;
+    background: #222;
 }
 
 #progressBar {
-    height: 8px;
+    height: 5px;
     width: 0%;
-    background: #00c6ff;
+    background: #00d4ff;
 }
 
 .success-box {
-    margin-top: 15px;
-    background: #111;
-    padding: 10px;
-    border-radius: 8px;
+    margin-top: 20px;
 }
 
-#linkBox {
-    width: 100%;
-    padding: 5px;
+.download-btn {
+    display: block;
     margin-top: 10px;
+    color: #00d4ff;
 }

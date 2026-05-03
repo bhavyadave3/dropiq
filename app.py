@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500 MB
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
 
 ALLOWED_EXTENSIONS = {
     'png', 'jpg', 'jpeg', 'gif',
@@ -48,12 +48,19 @@ def home():
         }
 
         link = f"/download/{unique_id}"
+        full_link = request.host_url.rstrip("/") + link
 
         return f"""
         <div class="success-box">
-            <b>Upload Successful!</b><br><br>
-            <input type="text" value="{link}" id="linkBox" readonly>
+            <p class="success-text">Upload Successful!</p>
+
+            <input type="text" value="{full_link}" id="linkBox" readonly>
+
             <button onclick="copyLink()">Copy Link</button>
+
+            <a href="{link}" target="_blank" class="download-btn">
+                Download File
+            </a>
         </div>
         """
 
@@ -65,13 +72,11 @@ def download_file(file_id):
     if file_id in file_data:
         file_info = file_data[file_id]
 
-        # Check expiry (15 min)
         if time.time() - file_info["time"] > 900:
             try:
                 os.remove(os.path.join(app.config["UPLOAD_FOLDER"], file_info["filename"]))
             except:
                 pass
-
             del file_data[file_id]
             return "Link expired!"
 
@@ -84,7 +89,6 @@ def download_file(file_id):
     return "Invalid or expired link!"
 
 
-# 🔥 Background auto-delete
 def delete_expired_files():
     while True:
         current_time = time.time()

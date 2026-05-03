@@ -8,14 +8,14 @@
 
 <div class="container">
     <h1 class="logo"><span>D</span>ropiq</h1>
-    <p>Temporary file sharing (auto-delete in 15 min)</p>
+    <p class="tagline">Fast. Private. Effortless sharing.</p>
 
     <div id="dropArea" class="drop-area">
         <p id="fileText">Drag & Drop file here or click to select</p>
         <input type="file" id="fileInput">
     </div>
 
-    <button onclick="uploadFile()">Upload</button>
+    <button onclick="uploadFile()">Upload File</button>
 
     <div class="progress-container">
         <div id="progressBar"></div>
@@ -25,16 +25,16 @@
 </div>
 
 <script>
-// file select text
-document.getElementById("fileInput").addEventListener("change", function() {
+const fileInput = document.getElementById("fileInput");
+const dropArea = document.getElementById("dropArea");
+
+// file select
+fileInput.addEventListener("change", function() {
     let fileName = this.files[0] ? this.files[0].name : "Choose File";
     document.getElementById("fileText").innerText = fileName;
 });
 
-// drag drop
-let dropArea = document.getElementById("dropArea");
-let fileInput = document.getElementById("fileInput");
-
+// drag
 dropArea.addEventListener("click", () => fileInput.click());
 
 dropArea.addEventListener("dragover", (e) => {
@@ -86,9 +86,7 @@ function uploadFile() {
 // copy link
 function copyLink() {
     let text = document.getElementById("linkBox").value;
-
-    navigator.clipboard.writeText(text)
-        .then(() => alert("Link copied!"));
+    navigator.clipboard.writeText(text).then(() => alert("Link copied!"));
 }
 </script>
 
