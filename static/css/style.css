@@ -1,0 +1,74 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0f0f, #2c2c2c);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background: #222;
+    padding: 40px;
+    border-radius: 15px;
+    width: 400px;
+    text-align: center;
+    color: white;
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #00c6ff;
+}
+
+.drop-area {
+    border: 2px dashed #555;
+    padding: 25px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.drop-area.active {
+    border-color: #00c6ff;
+}
+
+button {
+    background: #00c6ff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: black;
+}
+
+.progress-container {
+    width: 100%;
+    background: #111;
+    margin-top: 15px;
+    border-radius: 5px;
+}
+
+#progressBar {
+    height: 8px;
+    width: 0%;
+    background: #00c6ff;
+}
+
+.success-box {
+    margin-top: 15px;
+    background: #111;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+#linkBox {
+    width: 100%;
+    padding: 5px;
+    margin-top: 10px;
+}

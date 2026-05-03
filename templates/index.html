@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dropiq</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1 class="logo"><span>D</span>ropiq</h1>
+    <p>Temporary file sharing (auto-delete in 15 min)</p>
+
+    <div id="dropArea" class="drop-area">
+        <p id="fileText">Drag & Drop file here or click to select</p>
+        <input type="file" id="fileInput">
+    </div>
+
+    <button onclick="uploadFile()">Upload</button>
+
+    <div class="progress-container">
+        <div id="progressBar"></div>
+    </div>
+
+    <div id="status"></div>
+</div>
+
+<script>
+// file select text
+document.getElementById("fileInput").addEventListener("change", function() {
+    let fileName = this.files[0] ? this.files[0].name : "Choose File";
+    document.getElementById("fileText").innerText = fileName;
+});
+
+// drag drop
+let dropArea = document.getElementById("dropArea");
+let fileInput = document.getElementById("fileInput");
+
+dropArea.addEventListener("click", () => fileInput.click());
+
+dropArea.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    dropArea.classList.add("active");
+});
+
+dropArea.addEventListener("dragleave", () => {
+    dropArea.classList.remove("active");
+});
+
+dropArea.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropArea.classList.remove("active");
+
+    fileInput.files = e.dataTransfer.files;
+    document.getElementById("fileText").innerText = fileInput.files[0].name;
+});
+
+// upload
+function uploadFile() {
+    let file = fileInput.files[0];
+
+    if (!file) {
+        alert("Select a file first!");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("file", file);
+
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "/", true);
+
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            let percent = (e.loaded / e.total) * 100;
+            document.getElementById("progressBar").style.width = percent + "%";
+        }
+    };
+
+    xhr.onload = function() {
+        document.getElementById("status").innerHTML = xhr.responseText;
+    };
+
+    xhr.send(formData);
+}
+
+// copy link
+function copyLink() {
+    let text = document.getElementById("linkBox").value;
+
+    navigator.clipboard.writeText(text)
+        .then(() => alert("Link copied!"));
+}
+</script>
+
+</body>
+</html>
