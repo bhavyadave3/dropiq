@@ -1,4 +1,4 @@
-# Dropiq 🚀
+# Dropiq
 
 Live Website:
 https://dropiq-fvk3.onrender.com
