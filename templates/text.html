@@ -22,8 +22,25 @@
 </div>
 
 <script>
+const textBox = document.getElementById("textBox");
+
+/* Load saved text when page opens */
+window.onload = function() {
+    const savedText = localStorage.getItem("dropiq_text");
+    if (savedText) {
+        textBox.value = savedText;
+    }
+};
+
+/* Save text while typing */
+    textBox.addEventListener("input", function() {
+    localStorage.setItem("dropiq_text", textBox.value);
+});
+
+/* Clear text manually */
 function clearText() {
-    document.getElementById("textBox").value = "";
+    textBox.value = "";
+    localStorage.removeItem("dropiq_text");
 }
 </script>
 
