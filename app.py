@@ -1,117 +1,66 @@
 import os
-import uuid
+import shutil
 import time
-import threading
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+UPLOAD_FOLDER = 'uploads'
+MAX_SIZE = 10 * 1024 * 1024 * 1024  # 10GB
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
-
-ALLOWED_EXTENSIONS = {
-    'png', 'jpg', 'jpeg', 'gif',
-    'mp4', 'pdf', 'docx', 'xlsx', 'txt'
-}
-
-file_data = {}
+app.config['MAX_CONTENT_LENGTH'] = MAX_SIZE
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
+def delete_old_files():
+    now = time.time()
+    for filename in os.listdir(UPLOAD_FOLDER):
+        path = os.path.join(UPLOAD_FOLDER, filename)
+        if os.stat(path).st_mtime < now - 86400:
+            if os.path.isfile(path):
+                os.remove(path)
+            else:
+                shutil.rmtree(path)
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+@app.route('/')
+def index():
+    delete_old_files()
+    return render_template('index.html')
 
+@app.route('/upload_files', methods=['POST'])
+def upload_files():
+    files = request.files.getlist('files')
+    saved = []
 
-@app.route("/", methods=["GET", "POST"])
-def home():
-    if request.method == "POST":
-        file = request.files.get("file")
+    for file in files:
+        path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(path)
+        saved.append(file.filename)
 
-        if not file:
-            return "No file selected!"
+    return jsonify({"message": "Files uploaded", "files": saved})
 
-        if not allowed_file(file.filename):
-            return "Invalid file type!"
+@app.route('/upload_folder', methods=['POST'])
+def upload_folder():
+    files = request.files.getlist('folder')
+    saved = []
 
-        unique_id = str(uuid.uuid4())
-        filename = unique_id + "_" + file.filename
-        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    for file in files:
+        path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        file.save(path)
+        saved.append(file.filename)
 
-        file.save(filepath)
+    return jsonify({"message": "Folder uploaded", "files": saved})
 
-        file_data[unique_id] = {
-            "filename": filename,
-            "time": time.time()
-        }
+@app.route('/download/<filename>')
+def download(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
 
-        link = f"/download/{unique_id}"
-        full_link = request.host_url.rstrip("/") + link
-
-        return f"""
-        <div class="success-box">
-            <p class="success-text">Upload Successful!</p>
-
-            <input type="text" value="{full_link}" id="linkBox" readonly>
-
-            <button onclick="copyLink()">Copy Link</button>
-
-            <a href="{link}" target="_blank" class="download-btn">
-                Download File
-            </a>
-        </div>
-        """
-
-    return render_template("index.html")
-
-
-@app.route("/download/<file_id>")
-def download_file(file_id):
-    if file_id in file_data:
-        file_info = file_data[file_id]
-
-        if time.time() - file_info["time"] > 900:
-            try:
-                os.remove(os.path.join(app.config["UPLOAD_FOLDER"], file_info["filename"]))
-            except:
-                pass
-            del file_data[file_id]
-            return "Link expired!"
-
-        return send_from_directory(
-            app.config["UPLOAD_FOLDER"],
-            file_info["filename"],
-            as_attachment=True
-        )
-
-    return "Invalid or expired link!"
-
-
-def delete_expired_files():
-    while True:
-        current_time = time.time()
-        to_delete = []
-
-        for file_id, data in file_data.items():
-            if current_time - data["time"] > 900:
-                try:
-                    os.remove(os.path.join(app.config["UPLOAD_FOLDER"], data["filename"]))
-                except:
-                    pass
-                to_delete.append(file_id)
-
-        for file_id in to_delete:
-            del file_data[file_id]
-
-        time.sleep(60)
-
+@app.route('/text')
+def text():
+    return render_template('text.html')
 
 if __name__ == "__main__":
-    thread = threading.Thread(target=delete_expired_files)
-    thread.daemon = True
-    thread.start()
-
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=5000)

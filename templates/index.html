@@ -2,91 +2,129 @@
 <html>
 <head>
     <title>Dropiq</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<div class="container">
-    <h1 class="logo"><span>D</span>ropiq</h1>
-    <p class="tagline">Fast. Private. Effortless sharing.</p>
+<div class="top-bar">
+    <div class="branding">Dropiq</div>
+</div>
 
-    <div id="dropArea" class="drop-area">
-        <p id="fileText">Drag & Drop file here or click to select</p>
-        <input type="file" id="fileInput">
+<div class="main-card">
+
+    <!-- Upload Dropdown -->
+    <div class="dropdown">
+        <button id="uploadBtn" class="upload-btn">Upload</button>
+
+        <div id="dropdownMenu" class="dropdown-content hidden">
+            <label>
+                Upload Files
+                <input type="file" id="fileInput" multiple hidden>
+            </label>
+            <label>
+                Upload Folder
+                <input type="file" id="folderInput" webkitdirectory hidden>
+            </label>
+        </div>
     </div>
 
-    <button onclick="uploadFile()">Upload File</button>
+    <!-- Text Button (same style & size) -->
+    <a href="/text" class="upload-btn" style="display:inline-block; margin-top:20px;">
+        Text
+    </a>
 
-    <div class="progress-container">
-        <div id="progressBar"></div>
-    </div>
+    <!-- Drag Area -->
+    <div id="dropArea" class="hidden">Drop Files Here</div>
 
-    <div id="status"></div>
+    <!-- Preview -->
+    <div id="preview"></div>
+
+    <!-- Message -->
+    <div id="message"></div>
+
+    <!-- Download Links -->
+    <div id="downloadLinks"></div>
+
 </div>
 
 <script>
+const uploadBtn = document.getElementById("uploadBtn");
+const dropdown = document.getElementById("dropdownMenu");
 const fileInput = document.getElementById("fileInput");
+const folderInput = document.getElementById("folderInput");
+const preview = document.getElementById("preview");
 const dropArea = document.getElementById("dropArea");
 
-// file select
-fileInput.addEventListener("change", function() {
-    let fileName = this.files[0] ? this.files[0].name : "Choose File";
-    document.getElementById("fileText").innerText = fileName;
-});
+/* Toggle dropdown */
+uploadBtn.onclick = (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle("hidden");
+};
 
-// drag
-dropArea.addEventListener("click", () => fileInput.click());
-
-dropArea.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    dropArea.classList.add("active");
-});
-
-dropArea.addEventListener("dragleave", () => {
-    dropArea.classList.remove("active");
-});
-
-dropArea.addEventListener("drop", (e) => {
-    e.preventDefault();
-    dropArea.classList.remove("active");
-
-    fileInput.files = e.dataTransfer.files;
-    document.getElementById("fileText").innerText = fileInput.files[0].name;
-});
-
-// upload
-function uploadFile() {
-    let file = fileInput.files[0];
-
-    if (!file) {
-        alert("Select a file first!");
-        return;
+/* Close dropdown outside */
+window.addEventListener("click", function(e) {
+    if (!uploadBtn.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.add("hidden");
     }
+});
 
+/* File selection */
+fileInput.onchange = () => upload(fileInput.files, "/upload_files");
+folderInput.onchange = () => upload(folderInput.files, "/upload_folder");
+
+/* Drag behavior */
+window.addEventListener("dragenter", () => {
+    dropArea.classList.remove("hidden");
+});
+
+window.addEventListener("dragleave", () => {
+    dropArea.classList.add("hidden");
+});
+
+dropArea.addEventListener("dragover", e => e.preventDefault());
+
+dropArea.addEventListener("drop", e => {
+    e.preventDefault();
+    dropArea.classList.add("hidden");
+    upload(e.dataTransfer.files, "/upload_files");
+});
+
+/* Upload function */
+function upload(files, url) {
+    preview.innerHTML = "";
     let formData = new FormData();
-    formData.append("file", file);
+
+    document.getElementById("message").innerText = "Uploading...";
+
+    [...files].forEach(file => {
+        formData.append(url.includes("folder") ? "folder" : "files", file);
+
+        let div = document.createElement("div");
+        div.className = "file-item";
+        div.innerText = file.name;
+        preview.appendChild(div);
+    });
 
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/", true);
+    xhr.open("POST", url);
 
-    xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable) {
-            let percent = (e.loaded / e.total) * 100;
-            document.getElementById("progressBar").style.width = percent + "%";
-        }
-    };
+    xhr.onload = () => {
+        let res = JSON.parse(xhr.responseText);
+        document.getElementById("message").innerText = res.message;
 
-    xhr.onload = function() {
-        document.getElementById("status").innerHTML = xhr.responseText;
+        let links = document.getElementById("downloadLinks");
+        links.innerHTML = "";
+
+        res.files.forEach(file => {
+            let a = document.createElement("a");
+            a.href = "/download/" + file;
+            a.innerText = "Download " + file;
+            a.className = "download-btn";
+            links.appendChild(a);
+        });
     };
 
     xhr.send(formData);
-}
-
-// copy link
-function copyLink() {
-    let text = document.getElementById("linkBox").value;
-    navigator.clipboard.writeText(text).then(() => alert("Link copied!"));
 }
 </script>
 

@@ -1,0 +1,110 @@
+body {
+    margin: 0;
+    font-family: "Brush Script MT", cursive;
+    background: radial-gradient(circle at top, #1a001a, #000);
+    color: white;
+}
+
+/* TOP BAR */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 30px 50px;
+}
+
+/* BRAND */
+.branding {
+    font-size: 50px;
+    color: #800080;
+    text-shadow: 0 0 20px #800080;
+}
+
+/* MAIN CARD */
+.main-card {
+    width: 60%;
+    margin: 80px auto;
+    padding: 50px;
+    border-radius: 30px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    text-align: center;
+}
+
+/* BUTTON */
+.upload-btn {
+    padding: 20px 70px;
+    border-radius: 60px;
+    border: 2px solid #800080;
+    background: transparent;
+    color: #800080;
+    font-size: 26px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* DROPDOWN */
+.dropdown-content {
+    margin-top: 10px;
+    background: rgba(50,0,50,0.9);
+    border-radius: 20px;
+    padding: 10px;
+}
+
+.dropdown-content label {
+    display: block;
+    padding: 15px;
+    color: #E6E6FA;
+    cursor: pointer;
+}
+
+/* HIDDEN */
+.hidden {
+    display: none;
+}
+
+/* DRAG AREA */
+#dropArea {
+    margin: 30px auto;
+    padding: 40px;
+    width: 80%;
+    border: 2px dashed #800080;
+    border-radius: 20px;
+}
+
+/* FILE PREVIEW */
+.file-item {
+    margin: 10px;
+    padding: 10px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+/* MESSAGE */
+#message {
+    font-size: 22px;
+    color: #E6E6FA;
+}
+
+/* DOWNLOAD */
+.download-btn {
+    display: block;
+    background: #EE82EE;
+    color: #E6E6FA;
+    padding: 10px;
+    margin: 10px auto;
+    width: 220px;
+    border-radius: 30px;
+    text-decoration: none;
+}
+
+/* TEXT AREA */
+#textBox {
+    width: 90%;
+    height: 400px;
+    border-radius: 20px;
+    border: 2px solid #800080;
+    background: rgba(0,0,0,0.5);
+    color: #E6E6FA;
+    font-size: 20px;
+    padding: 20px;
+}

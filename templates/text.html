@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="branding">Dropiq</div>
+    <a href="/" class="upload-btn">⬅ Back</a>
+</div>
+
+<div class="main-card">
+
+    <textarea id="textBox" placeholder="Paste or type your text here..."></textarea>
+
+    <button onclick="clearText()" class="upload-btn" style="margin-top:20px;">
+        Clear Text
+    </button>
+
+</div>
+
+<script>
+function clearText() {
+    document.getElementById("textBox").value = "";
+}
+</script>
+
+</body>
+</html>
